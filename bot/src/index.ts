@@ -62,7 +62,7 @@ app.get("/health", (_req, res) => {
 // GET /api/server-config/:guildId — bot config lookup
 app.get("/api/server-config/:guildId", requireAuth, async (req, res) => {
   try {
-    const config = await getServerConfig(req.params.guildId);
+    const config = await getServerConfig(req.params.guildId as string);
     if (!config) {
       res.status(404).json({ error: "Server not found or inactive" });
       return;
