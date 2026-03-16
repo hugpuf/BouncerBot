@@ -2,12 +2,8 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL ?? '';
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? '';
-
-if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-  console.warn('Supabase env vars missing — auth features will not work.');
-}
+const SUPABASE_URL = 'https://bbdtalrnaegyjfallwrl.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_8TVIUMLA6dAr71LrGeXrlw_cVumIbYo';
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
