@@ -9,8 +9,8 @@ const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_8TVIUMLA6dAr71LrGeXrlw_cVumIbYo
 // import { supabase } from "@/integrations/supabase/client";
 
 export const supabase = createClient<Database>(
-  SUPABASE_URL || 'https://placeholder.supabase.co',
-  SUPABASE_PUBLISHABLE_KEY || 'placeholder-key',
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY,
   {
     auth: {
       storage: localStorage,
