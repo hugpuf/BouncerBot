@@ -2,12 +2,13 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, X } from "lucide-react";
 import { StepAddServer, type SelectedGuild } from "@/components/onboarding/StepAddServer";
 import { StepQuestionBuilder, type QuestionItem } from "@/components/onboarding/StepQuestionBuilder";
 import { StepDataDestination, type DestinationItem } from "@/components/onboarding/StepDataDestination";
 import { StepGoLive } from "@/components/onboarding/StepGoLive";
 import { useAuth } from "@/hooks/useAuth";
+import { useServerContext } from "@/hooks/useServerContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import bouncerLogo from "@/assets/bouncer-logo.png";
@@ -20,6 +21,7 @@ const DEFAULT_SUCCESS = "🎉 You're all set! Welcome aboard!";
 const Onboarding = () => {
   const navigate = useNavigate();
   const { session } = useAuth();
+  const { setSelectedServerId, refetchServers } = useServerContext();
   const [step, setStep] = useState(0);
 
   // Step 1
@@ -55,6 +57,10 @@ const Onboarding = () => {
   };
 
   const handleBack = () => {
+    if (isLive) {
+      setIsLive(false);
+      return;
+    }
     if (step > 0) setStep(step - 1);
   };
 
@@ -63,8 +69,8 @@ const Onboarding = () => {
     setSaving(true);
 
     try {
-      // 1. Insert server
-      const { data: server, error: serverErr } = await supabase.from("servers").insert({
+      // 1. Upsert server
+      const { data: server, error: serverErr } = await supabase.from("servers").upsert({
         discord_guild_id: selectedGuild.id,
         name: selectedGuild.name,
         icon_url: selectedGuild.icon
@@ -72,7 +78,7 @@ const Onboarding = () => {
           : null,
         owner_id: session.user.id,
         is_active: true,
-      }).select().single();
+      }, { onConflict: "discord_guild_id" }).select().single();
 
       if (serverErr || !server) throw serverErr || new Error("Failed to create server");
 
@@ -112,6 +118,9 @@ const Onboarding = () => {
         if (dErr) throw dErr;
       }
 
+      // Set as selected server
+      setSelectedServerId(server.id);
+      refetchServers();
       setIsLive(true);
       toast.success("You're live! 🚀");
     } catch (err: any) {
@@ -132,6 +141,10 @@ const Onboarding = () => {
         <div className="container mx-auto px-6 h-16 flex items-center gap-3">
           <img src={bouncerLogo} alt="Bouncer logo" className="h-8 w-auto object-contain" style={{ imageRendering: "pixelated" }} />
           <span className="font-pixel text-[9px] text-foreground">Setup</span>
+          <div className="flex-1" />
+          <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")} className="text-muted-foreground">
+            <X className="w-4 h-4" />
+          </Button>
         </div>
       </header>
 
@@ -155,7 +168,7 @@ const Onboarding = () => {
       <div className="flex-1 container mx-auto px-6 max-w-xl pb-32">
         <AnimatePresence mode="wait">
           <motion.div
-            key={step}
+            key={`${step}-${isLive}`}
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
@@ -194,18 +207,19 @@ const Onboarding = () => {
         </AnimatePresence>
       </div>
 
-      {!(step === 3) && (
-        <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 backdrop-blur-md">
-          <div className="container mx-auto px-6 py-4 max-w-xl flex items-center justify-between">
-            <Button variant="ghost" onClick={handleBack} disabled={step === 0} className="text-muted-foreground">
-              <ArrowLeft className="w-4 h-4 mr-1" /> Back
-            </Button>
+      {/* Navigation bar - show on all steps including success */}
+      <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 backdrop-blur-md">
+        <div className="container mx-auto px-6 py-4 max-w-xl flex items-center justify-between">
+          <Button variant="ghost" onClick={handleBack} disabled={step === 0 && !isLive} className="text-muted-foreground">
+            <ArrowLeft className="w-4 h-4 mr-1" /> Back
+          </Button>
+          {step < STEPS.length - 1 && (
             <Button onClick={handleNext} disabled={!canProceed()} className="gradient-mint-lavender text-primary-foreground font-pixel text-[10px] px-6">
               Next <ArrowRight className="w-4 h-4 ml-1" />
             </Button>
-          </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };
