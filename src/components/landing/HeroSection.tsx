@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { DiscordMockChat } from "@/components/landing/DiscordMockChat";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import bouncerLogo from "@/assets/bouncer-logo.png";
+import bouncerLogo from "@/assets/bouncer-logo-cropped.png";
 
 const fullText = "Turn anonymous Discord joins into ";
 const highlightText = "CRM contacts.";
