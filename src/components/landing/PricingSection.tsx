@@ -37,7 +37,7 @@ const plans = [
   {
     name: "VIP",
     tagline: "Your bot. Your brand. Your data pipeline.",
-    price: "€10",
+    price: "€20",
     color: "border-lavender/40",
     buttonClass: "gradient-peach-pink text-primary-foreground",
     popular: true,
