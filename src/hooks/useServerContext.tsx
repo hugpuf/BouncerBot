@@ -25,12 +25,17 @@ export function ServerProvider({ children }: { children: ReactNode }) {
     queryKey: ["servers", user?.id],
     enabled: !!user,
     queryFn: async () => {
+      console.log("Fetching servers for user:", user!.id);
       const { data, error } = await supabase
         .from("servers")
         .select("*")
         .eq("owner_id", user!.id)
         .order("created_at", { ascending: false });
-      if (error) throw error;
+      if (error) {
+        console.error("Server fetch error:", error);
+        throw error;
+      }
+      console.log("Servers found:", data?.length, data);
       return data;
     },
   });
