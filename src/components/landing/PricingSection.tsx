@@ -22,7 +22,7 @@ const plans = [
   {
     name: "Standard",
     tagline: "Unlimited flows. No questions asked.",
-    price: "€5",
+    price: "€10",
     color: "border-mint/40",
     buttonClass: "gradient-mint-lavender text-primary-foreground",
     features: [
