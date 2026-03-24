@@ -16,15 +16,15 @@ import bouncerLogo from "@/assets/bouncer-logo.png";
 
 const STEPS = ["Server", "Questions", "Data", "Go Live"];
 
-const DEFAULT_WELCOME = "👋 Welcome! Let's get you set up.";
-const DEFAULT_SUCCESS = "🎉 You're all set! Welcome aboard!";
+const DEFAULT_WELCOME = "😎 Welcome to {server_name} 😎 I'm going to need some ID. How many drinks have you had tonight?";
+const DEFAULT_SUCCESS = "✅ You're in. Don't cause trouble. 😎";
 
 const COMMUNITY_TEMPLATE: QuestionItem[] = [
-  { text: "What's your full name?", type: "text", required: true, skippable: false, sort_order: 1, options: [] },
-  { text: "What best describes your role?", type: "select", required: true, skippable: false, sort_order: 2, options: [{ id: "community-member", label: "Community Member" }, { id: "contributor", label: "Contributor" }, { id: "lurker", label: "Lurker" }] },
-  { text: "What are your interests?", type: "text", required: false, skippable: true, sort_order: 3, options: [] },
-  { text: "What's your email?", type: "email", required: false, skippable: true, sort_order: 4, options: [] },
-  { text: "How did you find us?", type: "text", required: false, skippable: true, sort_order: 5, options: [] },
+  { text: "What's your name?", type: "text", required: true, skippable: false, sort_order: 1, options: [] },
+  { text: "What best describes your role?", type: "select", required: true, skippable: false, sort_order: 2, options: [{ id: "community-member", label: "Community Member" }, { id: "contributor", label: "Contributor" }, { id: "moderator", label: "Moderator" }, { id: "just-browsing", label: "Just Browsing" }] },
+  { text: "What are you interested in?", type: "multi_select", required: false, skippable: true, sort_order: 3, options: [{ id: "design", label: "Design" }, { id: "engineering", label: "Engineering" }, { id: "product", label: "Product" }, { id: "marketing", label: "Marketing" }, { id: "business", label: "Business" }, { id: "other", label: "Other" }] },
+  { text: "How did you find us?", type: "select", required: false, skippable: true, sort_order: 4, options: [{ id: "twitter", label: "Twitter" }, { id: "linkedin", label: "LinkedIn" }, { id: "friend", label: "Friend" }, { id: "google", label: "Google" }, { id: "event", label: "Event" }, { id: "other", label: "Other" }] },
+  { text: "What's your email?", type: "email", required: false, skippable: true, sort_order: 5, options: [] },
 ];
 
 const Onboarding = () => {
@@ -51,6 +51,15 @@ const Onboarding = () => {
   const [saving, setSaving] = useState(false);
 
   const isFirstTime = !serversLoading && servers.length === 0;
+
+  // Update welcome message with server name when guild is selected
+  const handleGuildSelect = (guild: SelectedGuild) => {
+    setSelectedGuild(guild);
+    // Auto-populate server name in welcome message if using default
+    if (welcomeMessage === DEFAULT_WELCOME || welcomeMessage.includes("{server_name}")) {
+      // Keep the template variable — it'll be resolved at display/send time
+    }
+  };
 
   const canProceed = () => {
     switch (step) {
@@ -115,7 +124,7 @@ const Onboarding = () => {
         sort_order: i + 1,
         required: q.required,
         skippable: q.skippable,
-        options: q.type === "select" ? q.options : [],
+        options: q.type === "select" || q.type === "multi_select" ? q.options : [],
       }));
       const { error: qErr } = await supabase.from("flow_questions").insert(questionRows);
       if (qErr) throw qErr;
@@ -218,7 +227,7 @@ const Onboarding = () => {
               <StepAddServer
                 selectedGuild={selectedGuild}
                 botAdded={botAdded}
-                onGuildSelect={setSelectedGuild}
+                onGuildSelect={handleGuildSelect}
                 onBotAdded={() => setBotAdded(true)}
               />
             )}
@@ -247,7 +256,7 @@ const Onboarding = () => {
         </AnimatePresence>
       </div>
 
-      {/* Navigation bar - show on all steps including success */}
+      {/* Navigation bar */}
       <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 backdrop-blur-md">
         <div className="container mx-auto px-6 py-4 max-w-xl flex items-center justify-between">
           <Button variant="ghost" onClick={handleBack} disabled={step === 0 && !isLive} className="text-muted-foreground">
