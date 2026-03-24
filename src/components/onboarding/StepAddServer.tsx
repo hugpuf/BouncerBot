@@ -33,6 +33,7 @@ export const StepAddServer = ({ selectedGuild, botAdded, onGuildSelect, onBotAdd
   const [guilds, setGuilds] = useState<DiscordGuild[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [botInviteClicked, setBotInviteClicked] = useState(false);
 
   useEffect(() => {
     const fetchGuilds = async () => {

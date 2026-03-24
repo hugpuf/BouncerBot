@@ -38,7 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signInWithOAuth({
       provider: "discord",
       options: {
-        redirectTo: `${window.location.origin}/onboarding`,
+        redirectTo: `${window.location.origin}/dashboard`,
         scopes: "identify guilds",
       },
     });

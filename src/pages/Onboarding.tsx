@@ -151,6 +151,32 @@ const Onboarding = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      {/* Welcome modal for first-time users */}
+      {isFirstTime && (
+        <Dialog open={showWelcome} onOpenChange={setShowWelcome}>
+          <DialogContent className="sm:max-w-md text-center">
+            <div className="flex flex-col items-center gap-4 py-4">
+              <img
+                src={bouncerLogo}
+                alt="Bouncer mascot"
+                className="h-20 w-auto object-contain"
+                style={{ imageRendering: "pixelated" }}
+              />
+              <h2 className="font-pixel text-sm text-foreground">Welcome to Bouncer! 🎉</h2>
+              <p className="text-sm text-muted-foreground max-w-sm">
+                Let's set up your first server in under 2 minutes. You'll pick a Discord server, build your question flow, and go live.
+              </p>
+              <Button
+                onClick={() => setShowWelcome(false)}
+                className="gradient-mint-lavender text-primary-foreground font-pixel text-[10px] px-8 py-5"
+              >
+                Let's go
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
       <header className="border-b border-border bg-background/80 backdrop-blur-md">
         <div className="container mx-auto px-6 h-16 flex items-center gap-3">
           <img src={bouncerLogo} alt="Bouncer logo" className="h-8 w-auto object-contain" style={{ imageRendering: "pixelated" }} />
