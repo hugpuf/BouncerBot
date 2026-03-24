@@ -99,13 +99,13 @@ async function askQuestion(
   dm: DMChannel,
   question: Question
 ): Promise<string | null> {
-  if (question.type === "select" && question.options.length > 0) {
+  if ((question.type === "select" || question.type === "multi_select") && question.options.length > 0) {
     return askSelectQuestion(dm, question);
   }
 
-  const prefix = question.required ? "" : "(optional) ";
+  const optionalTag = !question.required || question.skippable ? " _(optional)_" : "";
   const skipHint = question.skippable ? '\nType "skip" to skip.' : "";
-  await dm.send(`${prefix}**${question.text}**${skipHint}`);
+  await dm.send(`**${question.text}**${optionalTag}${skipHint}`);
 
   try {
     const collected = await dm.awaitMessages({
