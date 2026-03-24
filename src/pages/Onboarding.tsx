@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, X } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { StepAddServer, type SelectedGuild } from "@/components/onboarding/StepAddServer";
 import { StepQuestionBuilder, type QuestionItem } from "@/components/onboarding/StepQuestionBuilder";
 import { StepDataDestination, type DestinationItem } from "@/components/onboarding/StepDataDestination";
@@ -18,20 +19,27 @@ const STEPS = ["Server", "Questions", "Data", "Go Live"];
 const DEFAULT_WELCOME = "👋 Welcome! Let's get you set up.";
 const DEFAULT_SUCCESS = "🎉 You're all set! Welcome aboard!";
 
+const COMMUNITY_TEMPLATE: QuestionItem[] = [
+  { text: "What's your full name?", type: "text", required: true, skippable: false, sort_order: 1, options: [] },
+  { text: "What best describes your role?", type: "select", required: true, skippable: false, sort_order: 2, options: [{ id: "community-member", label: "Community Member" }, { id: "contributor", label: "Contributor" }, { id: "lurker", label: "Lurker" }] },
+  { text: "What are your interests?", type: "text", required: false, skippable: true, sort_order: 3, options: [] },
+  { text: "What's your email?", type: "email", required: false, skippable: true, sort_order: 4, options: [] },
+  { text: "How did you find us?", type: "text", required: false, skippable: true, sort_order: 5, options: [] },
+];
+
 const Onboarding = () => {
   const navigate = useNavigate();
   const { session } = useAuth();
-  const { setSelectedServerId, refetchServers } = useServerContext();
+  const { servers, serversLoading, setSelectedServerId, refetchServers } = useServerContext();
   const [step, setStep] = useState(0);
+  const [showWelcome, setShowWelcome] = useState(true);
 
   // Step 1
   const [selectedGuild, setSelectedGuild] = useState<SelectedGuild | null>(null);
   const [botAdded, setBotAdded] = useState(false);
 
-  // Step 2
-  const [questions, setQuestions] = useState<QuestionItem[]>([
-    { text: "", type: "text", required: true, skippable: false, sort_order: 1, options: [] },
-  ]);
+  // Step 2 - pre-loaded with community template
+  const [questions, setQuestions] = useState<QuestionItem[]>(COMMUNITY_TEMPLATE);
 
   // Step 3
   const [destinations, setDestinations] = useState<DestinationItem[]>([]);
@@ -41,6 +49,8 @@ const Onboarding = () => {
   const [successMessage, setSuccessMessage] = useState(DEFAULT_SUCCESS);
   const [isLive, setIsLive] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  const isFirstTime = !serversLoading && servers.length === 0;
 
   const canProceed = () => {
     switch (step) {
@@ -53,6 +63,10 @@ const Onboarding = () => {
   };
 
   const handleNext = () => {
+    if (step === 1 && questions.length === 0) {
+      toast.error("Add at least one question to continue.");
+      return;
+    }
     if (step < STEPS.length - 1) setStep(step + 1);
   };
 
@@ -137,6 +151,32 @@ const Onboarding = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      {/* Welcome modal for first-time users */}
+      {isFirstTime && (
+        <Dialog open={showWelcome} onOpenChange={setShowWelcome}>
+          <DialogContent className="sm:max-w-md text-center">
+            <div className="flex flex-col items-center gap-4 py-4">
+              <img
+                src={bouncerLogo}
+                alt="Bouncer mascot"
+                className="h-20 w-auto object-contain"
+                style={{ imageRendering: "pixelated" }}
+              />
+              <h2 className="font-pixel text-sm text-foreground">Welcome to Bouncer! 🎉</h2>
+              <p className="text-sm text-muted-foreground max-w-sm">
+                Let's set up your first server in under 2 minutes. You'll pick a Discord server, build your question flow, and go live.
+              </p>
+              <Button
+                onClick={() => setShowWelcome(false)}
+                className="gradient-mint-lavender text-primary-foreground font-pixel text-[10px] px-8 py-5"
+              >
+                Let's go
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
       <header className="border-b border-border bg-background/80 backdrop-blur-md">
         <div className="container mx-auto px-6 h-16 flex items-center gap-3">
           <img src={bouncerLogo} alt="Bouncer logo" className="h-8 w-auto object-contain" style={{ imageRendering: "pixelated" }} />

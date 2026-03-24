@@ -33,6 +33,7 @@ export const StepAddServer = ({ selectedGuild, botAdded, onGuildSelect, onBotAdd
   const [guilds, setGuilds] = useState<DiscordGuild[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [botInviteClicked, setBotInviteClicked] = useState(false);
 
   useEffect(() => {
     const fetchGuilds = async () => {
@@ -158,20 +159,36 @@ export const StepAddServer = ({ selectedGuild, botAdded, onGuildSelect, onBotAdd
           animate={{ opacity: 1, y: 0 }}
           className="space-y-3"
         >
-          <Button
-            onClick={handleAddBot}
-            className="w-full py-6 bg-[hsl(235,85%,65%)] hover:bg-[hsl(235,85%,58%)] text-foreground font-medium text-sm"
-          >
-            <ExternalLink className="w-4 h-4 mr-2" />
-            Add Bouncer to {selectedGuild.name}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={onBotAdded}
-            className="w-full text-sm"
-          >
-            I've added the bot — continue
-          </Button>
+          {!botInviteClicked ? (
+            <Button
+              onClick={() => { handleAddBot(); setBotInviteClicked(true); }}
+              className="w-full py-6 bg-[hsl(235,85%,65%)] hover:bg-[hsl(235,85%,58%)] text-foreground font-medium text-sm"
+            >
+              <ExternalLink className="w-4 h-4 mr-2" />
+              Add Bouncer to {selectedGuild.name}
+            </Button>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground text-center">
+                Complete the bot authorization in the new tab, then come back here.
+              </p>
+              <Button
+                onClick={onBotAdded}
+                className="w-full py-6 gradient-mint-lavender text-primary-foreground font-pixel text-[10px]"
+              >
+                <Check className="w-4 h-4 mr-2" />
+                I've added the bot — continue
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => { handleAddBot(); }}
+                className="w-full text-xs text-muted-foreground"
+              >
+                <ExternalLink className="w-3 h-3 mr-1" /> Re-open invite link
+              </Button>
+            </>
+          )}
         </motion.div>
       )}
 

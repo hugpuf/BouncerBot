@@ -18,6 +18,7 @@ const Login = () => {
     return <Navigate to="/dashboard" replace />;
   }
 
+
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-8 px-4">
       <div className="flex flex-col items-center gap-4">
