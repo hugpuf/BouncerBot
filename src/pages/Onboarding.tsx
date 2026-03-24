@@ -50,6 +50,8 @@ const Onboarding = () => {
   const [isLive, setIsLive] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  const isFirstTime = !serversLoading && servers.length === 0;
+
   const canProceed = () => {
     switch (step) {
       case 0: return !!selectedGuild && botAdded;
@@ -61,6 +63,10 @@ const Onboarding = () => {
   };
 
   const handleNext = () => {
+    if (step === 1 && questions.length === 0) {
+      toast.error("Add at least one question to continue.");
+      return;
+    }
     if (step < STEPS.length - 1) setStep(step + 1);
   };
 
