@@ -9,23 +9,31 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export interface QuestionItem {
   text: string;
-  type: "text" | "select" | "email" | "url";
+  type: "text" | "select" | "multi_select" | "email" | "url";
   required: boolean;
   skippable: boolean;
   sort_order: number;
   options: Array<{ id: string; label: string }>;
 }
 
+const TYPE_LABELS: Record<QuestionItem["type"], string> = {
+  text: "Text",
+  select: "Single Select",
+  multi_select: "Multi Select",
+  email: "Email",
+  url: "URL",
+};
+
 const TEMPLATES: Record<string, { name: string; emoji: string; questions: QuestionItem[] }> = {
   community: {
     name: "Community Onboarding",
     emoji: "🎉",
     questions: [
-      { text: "What's your full name?", type: "text", required: true, skippable: false, sort_order: 1, options: [] },
-      { text: "What best describes your role?", type: "select", required: true, skippable: false, sort_order: 2, options: [{ id: "community-member", label: "Community Member" }, { id: "contributor", label: "Contributor" }, { id: "lurker", label: "Lurker" }] },
-      { text: "What are your interests?", type: "text", required: false, skippable: true, sort_order: 3, options: [] },
-      { text: "What's your email?", type: "email", required: false, skippable: true, sort_order: 4, options: [] },
-      { text: "How did you find us?", type: "text", required: false, skippable: true, sort_order: 5, options: [] },
+      { text: "What's your name?", type: "text", required: true, skippable: false, sort_order: 1, options: [] },
+      { text: "What best describes your role?", type: "select", required: true, skippable: false, sort_order: 2, options: [{ id: "community-member", label: "Community Member" }, { id: "contributor", label: "Contributor" }, { id: "moderator", label: "Moderator" }, { id: "just-browsing", label: "Just Browsing" }] },
+      { text: "What are you interested in?", type: "multi_select", required: false, skippable: true, sort_order: 3, options: [{ id: "design", label: "Design" }, { id: "engineering", label: "Engineering" }, { id: "product", label: "Product" }, { id: "marketing", label: "Marketing" }, { id: "business", label: "Business" }, { id: "other", label: "Other" }] },
+      { text: "How did you find us?", type: "select", required: false, skippable: true, sort_order: 4, options: [{ id: "twitter", label: "Twitter" }, { id: "linkedin", label: "LinkedIn" }, { id: "friend", label: "Friend" }, { id: "google", label: "Google" }, { id: "event", label: "Event" }, { id: "other", label: "Other" }] },
+      { text: "What's your email?", type: "email", required: false, skippable: true, sort_order: 5, options: [] },
     ],
   },
   research: {
@@ -33,23 +41,24 @@ const TEMPLATES: Record<string, { name: string; emoji: string; questions: Questi
     emoji: "🔬",
     questions: [
       { text: "What's your full name?", type: "text", required: true, skippable: false, sort_order: 1, options: [] },
-      { text: "What's your role type?", type: "select", required: true, skippable: false, sort_order: 2, options: [{ id: "academic", label: "Academic Researcher" }, { id: "industry", label: "Industry Researcher" }, { id: "developer", label: "Software Developer" }, { id: "other", label: "Something Else" }] },
+      { text: "What's your role?", type: "select", required: true, skippable: false, sort_order: 2, options: [{ id: "student", label: "Student" }, { id: "postdoc", label: "Postdoc" }, { id: "professor", label: "Professor" }, { id: "industry", label: "Industry Researcher" }] },
       { text: "What's your organization?", type: "text", required: true, skippable: false, sort_order: 3, options: [] },
-      { text: "Organization website?", type: "url", required: false, skippable: true, sort_order: 4, options: [] },
-      { text: "What's your email?", type: "email", required: false, skippable: true, sort_order: 5, options: [] },
-      { text: "LinkedIn profile URL?", type: "url", required: false, skippable: true, sort_order: 6, options: [] },
+      { text: "What are your research areas?", type: "multi_select", required: true, skippable: false, sort_order: 4, options: [{ id: "ai-ml", label: "AI / Machine Learning" }, { id: "biology", label: "Biology" }, { id: "physics", label: "Physics" }, { id: "chemistry", label: "Chemistry" }, { id: "engineering", label: "Engineering" }, { id: "social-sciences", label: "Social Sciences" }, { id: "other", label: "Other" }] },
+      { text: "What's your institutional email?", type: "email", required: true, skippable: false, sort_order: 5, options: [] },
+      { text: "Google Scholar or personal site?", type: "url", required: false, skippable: true, sort_order: 6, options: [] },
+      { text: "Open to collaborations?", type: "select", required: true, skippable: false, sort_order: 7, options: [{ id: "yes", label: "Yes, definitely!" }, { id: "maybe", label: "Maybe, depends" }, { id: "no", label: "Just here to learn" }] },
     ],
   },
   saas: {
     name: "SaaS Community",
     emoji: "🚀",
     questions: [
-      { text: "What's your full name?", type: "text", required: true, skippable: false, sort_order: 1, options: [] },
+      { text: "What's your name?", type: "text", required: true, skippable: false, sort_order: 1, options: [] },
       { text: "Company name?", type: "text", required: true, skippable: false, sort_order: 2, options: [] },
-      { text: "Job title?", type: "text", required: true, skippable: false, sort_order: 3, options: [] },
-      { text: "What's your use case?", type: "text", required: false, skippable: true, sort_order: 4, options: [] },
-      { text: "Email address?", type: "email", required: false, skippable: true, sort_order: 5, options: [] },
-      { text: "How did you hear about us?", type: "text", required: false, skippable: true, sort_order: 6, options: [] },
+      { text: "What's your role?", type: "select", required: true, skippable: false, sort_order: 3, options: [{ id: "founder", label: "Founder / CEO" }, { id: "product", label: "Product" }, { id: "engineering", label: "Engineering" }, { id: "marketing", label: "Marketing" }, { id: "sales", label: "Sales" }, { id: "other", label: "Other" }] },
+      { text: "Are you a customer?", type: "select", required: true, skippable: false, sort_order: 4, options: [{ id: "yes", label: "Yes" }, { id: "trial", label: "On a trial" }, { id: "evaluating", label: "Evaluating" }, { id: "not-yet", label: "Not yet" }] },
+      { text: "What features interest you?", type: "multi_select", required: false, skippable: true, sort_order: 5, options: [{ id: "analytics", label: "Analytics" }, { id: "integrations", label: "Integrations" }, { id: "automation", label: "Automation" }, { id: "api", label: "API" }, { id: "support", label: "Support" }] },
+      { text: "Work email?", type: "email", required: true, skippable: false, sort_order: 6, options: [] },
     ],
   },
 };
@@ -128,6 +137,17 @@ export const StepQuestionBuilder = ({ questions, onChange }: StepQuestionBuilder
     setExpandedIndex(0);
   };
 
+  const hasOptions = (type: QuestionItem["type"]) => type === "select" || type === "multi_select";
+
+  const handleTypeChange = (index: number, newType: QuestionItem["type"]) => {
+    const q = questions[index];
+    const keepOptions = hasOptions(newType);
+    updateQuestion(index, {
+      type: newType,
+      options: keepOptions ? q.options : [],
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -181,7 +201,7 @@ export const StepQuestionBuilder = ({ questions, onChange }: StepQuestionBuilder
                   {q.text || "Untitled question"}
                 </span>
                 <span className="text-[10px] text-muted-foreground bg-background px-2 py-0.5 rounded">
-                  {q.type}
+                  {TYPE_LABELS[q.type]}
                 </span>
               </button>
 
@@ -205,13 +225,14 @@ export const StepQuestionBuilder = ({ questions, onChange }: StepQuestionBuilder
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <Label className="text-xs text-muted-foreground mb-1 block">Type</Label>
-                          <Select value={q.type} onValueChange={(v) => updateQuestion(i, { type: v as QuestionItem["type"], options: v === "select" ? q.options : [] })}>
+                          <Select value={q.type} onValueChange={(v) => handleTypeChange(i, v as QuestionItem["type"])}>
                             <SelectTrigger className="bg-background border-border text-sm">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="text">Text</SelectItem>
-                              <SelectItem value="select">Select</SelectItem>
+                              <SelectItem value="select">Single Select</SelectItem>
+                              <SelectItem value="multi_select">Multi Select</SelectItem>
                               <SelectItem value="email">Email</SelectItem>
                               <SelectItem value="url">URL</SelectItem>
                             </SelectContent>
@@ -231,8 +252,15 @@ export const StepQuestionBuilder = ({ questions, onChange }: StepQuestionBuilder
                         </div>
                       </div>
 
-                      {/* Select options */}
-                      {q.type === "select" && (
+                      {/* Multi select note */}
+                      {q.type === "multi_select" && (
+                        <p className="text-xs text-muted-foreground bg-primary/10 rounded-lg px-3 py-2">
+                          Users can pick multiple options.
+                        </p>
+                      )}
+
+                      {/* Options editor for select & multi_select */}
+                      {hasOptions(q.type) && (
                         <div className="space-y-2">
                           <Label className="text-xs text-muted-foreground">Options</Label>
                           {q.options.map((opt, oi) => (
